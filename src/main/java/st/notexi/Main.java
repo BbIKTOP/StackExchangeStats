@@ -14,7 +14,8 @@ import java.util.stream.Collectors;
 public class Main
 {
     private final static int THROTHLING_LIMIT_PER_SEC = 30;
-    private final static int PAGESIZE = 100;
+    private final static int PAGE_SIZE = 100;
+    private final static int PAGES_LIMIT = 50;
     private final static String MIN_REPUTATION = "223";
     private final static Set<String> REQUIRED_TAGS = new HashSet<>();
     private final static Set<String> REQUIRED_COUNTRIES = new HashSet<>();
@@ -25,7 +26,7 @@ public class Main
         REQUIRED_TAGS.add(".net");
         REQUIRED_TAGS.add("docker");
         REQUIRED_TAGS.add("c#");
-        REQUIRED_TAGS.add("apigee");
+//        REQUIRED_TAGS.add("apigee");
 
         REQUIRED_COUNTRIES.add("romania");
         REQUIRED_COUNTRIES.add("moldova");
@@ -36,7 +37,7 @@ public class Main
         System.out.println("Starting: " + System.currentTimeMillis());
 
         Map<String, String> params = new HashMap<>();
-        params.put("pagesize", Integer.toString(PAGESIZE));
+        params.put("pagesize", Integer.toString(PAGE_SIZE));
         params.put("order", "desc");
         params.put("sort", "reputation");
         params.put("site", "stackoverflow");
@@ -128,7 +129,7 @@ public class Main
             }
             i++;
             previousReqTime = System.currentTimeMillis();
-        } while (i < 10);
+        } while (i < PAGES_LIMIT);
 
         System.out.println("Done: " + System.currentTimeMillis());
     }
