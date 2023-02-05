@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class Main
 {
-    // https://api.stackexchange.com/2.3/users?page=1&pagesize=10&site=stackoverflow&filter=!)AAF.30qP7MgDt0CTt)h3LW12.24xtlC5m5-QI
+    private final static int THROTHLING_LIMIT_PER_SEC = 30;
     private final static int PAGESIZE = 100;
     private final static String MIN_REPUTATION = "223";
     private final static Set<String> REQUIRED_TAGS = new HashSet<>();
@@ -47,11 +47,24 @@ public class Main
         StackExchangeUsers stackExchangeUsers = retrofit.create(StackExchangeUsers.class);
         Call<Items> call = stackExchangeUsers.getUsers(params);
 
-        // Todo: add throttling (30 reqs per second)
+        long previousReqTime = 0;
         Items items;
         int i = 1;
         do
         {
+            // Check throttling
+            long executionTime = System.currentTimeMillis() - previousReqTime;
+            if (executionTime < 1000 / THROTHLING_LIMIT_PER_SEC)
+            {
+                try
+                {
+                    Thread.sleep(100 / THROTHLING_LIMIT_PER_SEC - executionTime);
+                }
+                catch (InterruptedException ignored)
+                {
+                }
+            }
+
             params.put("page", Integer.toString(i));
             items = call.execute().body();
             if (items == null) break;
@@ -64,8 +77,10 @@ public class Main
                     {
                         try
                         {
-                            List<String> tags = item.getCollectives().get(0).getCollective().getTags();
-                            if (tags.stream().noneMatch(REQUIRED_TAGS::contains)
+                            if (item.getCollectives().get(0)
+                                    .getCollective()
+                                    .getTags()
+                                    .stream().noneMatch(REQUIRED_TAGS::contains)
                             ) return (false);
                         }
                         catch (NullPointerException npe)
@@ -104,6 +119,7 @@ public class Main
                 );
             }
             i++;
+            previousReqTime = System.currentTimeMillis();
         } while (i < 10);
 
         System.out.println("Done: " + System.currentTimeMillis());
