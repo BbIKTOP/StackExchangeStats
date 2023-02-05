@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class Main
 {
-    private final static int THROTHLING_LIMIT_PER_SEC = 1;
+    private final static int THROTHLING_LIMIT_PER_SEC = 10;
     private final static int PAGE_SIZE = 100;
     private final static int PAGES_LIMIT = 500;
     private final static String MIN_REPUTATION = "223";
@@ -115,7 +115,8 @@ public class Main
                     {
                         try
                         {
-                            if (item.getCollectives().get(0).getCollective().getTags().stream().noneMatch(REQUIRED_TAGS::contains))
+                            if (item.getCollectives().get(0).getCollective().getTags().stream()
+                                    .noneMatch(REQUIRED_TAGS::contains))
                                 return (false);
                         }
                         catch (NullPointerException npe)
@@ -128,7 +129,10 @@ public class Main
 //            if (users.size() == 0) System.out.print("-\n");
             for (User u : users)
             {
-                System.out.print(u.getDisplayName() + "|" + u.getLocation() + "|" + u.getAnswerCount() + "|" + u.getQuestionCount() + "|");
+                System.out.print(u.getDisplayName() + "|" +
+                        u.getLocation() + "|" +
+                        u.getAnswerCount() + "|" +
+                        u.getQuestionCount() + "|");
 
                 boolean first = true;
                 try
@@ -145,7 +149,9 @@ public class Main
                 }
                 if (!first) System.out.print("|");
 
-                System.out.println(u.getDisplayName() + "|" + u.getLink() + "|" + u.getProfileImage() + "|");
+                System.out.println(u.getDisplayName() + "|" +
+                        u.getLink() + "|" +
+                        u.getProfileImage() + "|");
             }
             i++;
             previousReqTime = System.currentTimeMillis();
