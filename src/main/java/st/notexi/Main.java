@@ -17,6 +17,7 @@ public class Main
     private final static int PAGESIZE = 100;
     private final static String MIN_REPUTATION = "223";
     private final static Set<String> REQUIRED_TAGS = new HashSet<>();
+    private final static Set<String> REQUIRED_COUNTRIES = new HashSet<>();
 
     static
     {
@@ -24,6 +25,10 @@ public class Main
         REQUIRED_TAGS.add(".net");
         REQUIRED_TAGS.add("docker");
         REQUIRED_TAGS.add("c#");
+        REQUIRED_TAGS.add("apigee");
+
+        REQUIRED_COUNTRIES.add("romania");
+        REQUIRED_COUNTRIES.add("moldova");
     }
 
     public static void main(String[] args) throws IOException
@@ -70,8 +75,11 @@ public class Main
             if (items == null) break;
             call = call.clone();
 
+            // Do we need to filter by user_type equalsTo "registered"?
             List<User> users = items.getItems().stream()
-                    .filter(item -> item.getLocation() != null && (item.getLocation().equalsIgnoreCase("romania") || item.getLocation().equalsIgnoreCase("moldova")))
+                    .filter(item -> item.getLocation() != null &&
+                            REQUIRED_COUNTRIES.stream()
+                                    .anyMatch(country -> item.getLocation().toLowerCase().contains(country)))
                     .filter(item -> item.getAnswerCount() > 0)
                     .filter(item ->
                     {
