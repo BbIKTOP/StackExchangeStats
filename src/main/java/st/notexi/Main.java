@@ -72,7 +72,7 @@ public class Main
             }
 
             params.put("page", Integer.toString(i));
-            items = call.execute().body();
+            items = call.execute().body(); // Synchronous request
             if (items == null) break;
             if (items.getItems() == null)
             {
