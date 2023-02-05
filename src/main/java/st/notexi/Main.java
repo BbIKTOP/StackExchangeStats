@@ -125,7 +125,7 @@ public class Main
                         return (true);
                     }).collect(Collectors.toList());
 
-            if (users.size() == 0) System.out.print("-\n");
+//            if (users.size() == 0) System.out.print("-\n");
             for (User u : users)
             {
                 System.out.print(u.getDisplayName() + "|" + u.getLocation() + "|" + u.getAnswerCount() + "|" + u.getQuestionCount() + "|");
