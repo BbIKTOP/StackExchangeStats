@@ -100,19 +100,27 @@ public class Main
             call = call.clone();
 
             // Do we need to filter by user_type equalsTo "registered"?
-            List<User> users = items.getItems().stream().filter(item -> item.getLocation() != null && REQUIRED_COUNTRIES.stream().anyMatch(country -> item.getLocation().toLowerCase().contains(country))).filter(item -> item.getAnswerCount() > 0).filter(item ->
-            {
-                try
-                {
-                    if (item.getCollectives().get(0).getCollective().getTags().stream().noneMatch(REQUIRED_TAGS::contains))
-                        return (false);
-                }
-                catch (NullPointerException npe)
-                {
-                    return (false);
-                }
-                return (true);
-            }).collect(Collectors.toList());
+            List<User> users = items.getItems().stream()
+                    .filter(item -> item.getLocation() != null
+                            &&
+                            REQUIRED_COUNTRIES.stream()
+                                    .anyMatch(country -> item.getLocation()
+                                            .toLowerCase()
+                                            .contains(country)))
+                    .filter(item -> item.getAnswerCount() > 0)
+                    .filter(item ->
+                    {
+                        try
+                        {
+                            if (item.getCollectives().get(0).getCollective().getTags().stream().noneMatch(REQUIRED_TAGS::contains))
+                                return (false);
+                        }
+                        catch (NullPointerException npe)
+                        {
+                            return (false);
+                        }
+                        return (true);
+                    }).collect(Collectors.toList());
             for (User u : users)
             {
                 System.out.print(u.getDisplayName() + "|" + u.getLocation() + "|" + u.getAnswerCount() + "|" + u.getQuestionCount() + "|");
@@ -127,7 +135,7 @@ public class Main
                         System.out.print(tag);
                     }
                 }
-                catch (NullPointerException ignored)
+                catch (NullPointerException ignored) // No tags, print nothing
                 {
                 }
                 if (!first) System.out.print("|");
