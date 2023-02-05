@@ -16,9 +16,9 @@ import java.util.stream.Collectors;
 
 public class Main
 {
-    private final static int THROTHLING_LIMIT_PER_10SEC = 5;
+    private final static int THROTHLING_LIMIT_PER_10SEC = 290;
     private final static int PAGE_SIZE = 100;
-    private final static int PAGES_LIMIT = 500;
+    private final static int PAGES_LIMIT = 1000;
     private final static String MIN_REPUTATION = "223";
     private final static String ACCESS_KEY = "v)BNnoGX599gljDYzv1Odw((";
     private final static String FIELDS_FILTER = "!d0OIIVTgrb09xZY)*aPuDD0EMy4(rCDQ0FUn";
@@ -61,21 +61,6 @@ public class Main
         int pageNo = 1;
         do
         {
-            // Check throttling
-            long executionTime = System.currentTimeMillis() - previousReqTime;
-            if (executionTime < 10000 / THROTHLING_LIMIT_PER_10SEC)
-            {
-                try
-                {
-                    Thread.sleep(10000 / THROTHLING_LIMIT_PER_10SEC - executionTime);
-                }
-                catch (InterruptedException ignored)
-                {
-                    System.out.println("Interrupted!");
-                }
-            }
-            previousReqTime = System.currentTimeMillis();
-
             params.put("page", Integer.toString(pageNo));
             Response<Items> response = call.execute(); // Synchronous request
 
@@ -156,6 +141,27 @@ public class Main
                         u.getLink() + "|" +
                         u.getProfileImage() + "|");
             }
+
+            // Check throttling
+            long executionTime = System.currentTimeMillis() - previousReqTime;
+            if (executionTime < 10000 / THROTHLING_LIMIT_PER_10SEC || (items.getBackoff() != null))
+            {
+                long timeout;
+                if (items.getBackoff() != null)
+                    timeout = items.getBackoff() * 1000L;
+                else
+                    timeout = 10000 / THROTHLING_LIMIT_PER_10SEC - executionTime;
+                try
+                {
+                    Thread.sleep(timeout);
+                }
+                catch (InterruptedException ignored)
+                {
+                    System.out.println("Interrupted!");
+                }
+            }
+            previousReqTime = System.currentTimeMillis();
+
             pageNo++;
         } while (pageNo < PAGES_LIMIT);
 

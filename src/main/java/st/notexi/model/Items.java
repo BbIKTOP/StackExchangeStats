@@ -30,6 +30,9 @@ public class Items
     @SerializedName("total")
     @Expose
     private Integer total;
+    @SerializedName("backoff")
+    @Expose
+    private Integer backoff;
     @SerializedName("type")
     @Expose
     private String type;
