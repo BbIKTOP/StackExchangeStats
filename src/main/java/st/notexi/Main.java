@@ -76,16 +76,18 @@ public class Main
 
             if (!response.isSuccessful())
             {
-                try
+                ErrorDescription errorDescription;
+                if (response.errorBody() != null)
                 {
-                    ErrorDescription errorDescription = new Gson().fromJson(response.errorBody().string(), ErrorDescription.class);
+                    errorDescription = new Gson().fromJson(response.errorBody().string(), ErrorDescription.class);
                     System.out.printf("Server error %d (%s): %s\n",
                             errorDescription.getErrorId(),
                             errorDescription.getErrorName(),
                             errorDescription.getErrorMessage());
                 }
-                catch (NullPointerException ignored)
+                else
                 {
+                    System.out.println("Server error.");
                 }
                 break;
             }
