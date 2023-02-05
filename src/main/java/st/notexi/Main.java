@@ -1,8 +1,11 @@
 package st.notexi;
 
+import com.google.gson.Gson;
 import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
+import st.notexi.model.ErrorDescription;
 import st.notexi.model.Items;
 import st.notexi.model.User;
 import st.notexi.service.StackExchangeUsers;
@@ -46,10 +49,7 @@ public class Main
 
         String url = "https://api.stackexchange.com/";
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(url)
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(url).addConverterFactory(GsonConverterFactory.create()).build();
         StackExchangeUsers stackExchangeUsers = retrofit.create(StackExchangeUsers.class);
         Call<Items> call = stackExchangeUsers.getUsers(params);
 
@@ -72,9 +72,25 @@ public class Main
             }
 
             params.put("page", Integer.toString(i));
-            items = call.execute().body(); // Synchronous request
-            if (items == null) break;
-            if (items.getItems() == null)
+            Response<Items> response = call.execute(); // Synchronous request
+
+            if (!response.isSuccessful())
+            {
+                try
+                {
+                    ErrorDescription errorDescription = new Gson().fromJson(response.errorBody().string(), ErrorDescription.class);
+                    System.out.printf("Server error %d (%s): %s\n",
+                            errorDescription.getErrorId(),
+                            errorDescription.getErrorName(),
+                            errorDescription.getErrorMessage());
+                }
+                catch (NullPointerException ignored)
+                {
+                }
+                break;
+            }
+            items = response.body();
+            if (items == null || items.getItems() == null)
             {
                 System.out.println("No users found!");
                 break;
@@ -82,35 +98,22 @@ public class Main
             call = call.clone();
 
             // Do we need to filter by user_type equalsTo "registered"?
-            List<User> users = items.getItems().stream()
-                    .filter(item -> item.getLocation() != null &&
-                            REQUIRED_COUNTRIES.stream()
-                                    .anyMatch(country -> item.getLocation().toLowerCase().contains(country)))
-                    .filter(item -> item.getAnswerCount() > 0)
-                    .filter(item ->
-                    {
-                        try
-                        {
-                            if (item.getCollectives().get(0)
-                                    .getCollective()
-                                    .getTags()
-                                    .stream().noneMatch(REQUIRED_TAGS::contains)
-                            ) return (false);
-                        }
-                        catch (NullPointerException npe)
-                        {
-                            return (false);
-                        }
-                        return (true);
-                    })
-                    .collect(Collectors.toList());
+            List<User> users = items.getItems().stream().filter(item -> item.getLocation() != null && REQUIRED_COUNTRIES.stream().anyMatch(country -> item.getLocation().toLowerCase().contains(country))).filter(item -> item.getAnswerCount() > 0).filter(item ->
+            {
+                try
+                {
+                    if (item.getCollectives().get(0).getCollective().getTags().stream().noneMatch(REQUIRED_TAGS::contains))
+                        return (false);
+                }
+                catch (NullPointerException npe)
+                {
+                    return (false);
+                }
+                return (true);
+            }).collect(Collectors.toList());
             for (User u : users)
             {
-                System.out.print(u.getDisplayName() + "|" +
-                        u.getLocation() + "|" +
-                        u.getAnswerCount() + "|" +
-                        u.getQuestionCount() + "|"
-                );
+                System.out.print(u.getDisplayName() + "|" + u.getLocation() + "|" + u.getAnswerCount() + "|" + u.getQuestionCount() + "|");
 
                 boolean first = true;
                 try
@@ -127,10 +130,7 @@ public class Main
                 }
                 if (!first) System.out.print("|");
 
-                System.out.println(u.getDisplayName() + "|" +
-                        u.getLink() + "|" +
-                        u.getProfileImage() + "|"
-                );
+                System.out.println(u.getDisplayName() + "|" + u.getLink() + "|" + u.getProfileImage() + "|");
             }
             i++;
             previousReqTime = System.currentTimeMillis();
