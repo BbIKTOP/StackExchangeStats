@@ -74,6 +74,11 @@ public class Main
             params.put("page", Integer.toString(i));
             items = call.execute().body();
             if (items == null) break;
+            if (items.getItems() == null)
+            {
+                System.out.println("No users found!");
+                break;
+            }
             call = call.clone();
 
             // Do we need to filter by user_type equalsTo "registered"?
