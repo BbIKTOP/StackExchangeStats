@@ -16,10 +16,12 @@ import java.util.stream.Collectors;
 
 public class Main
 {
-    private final static int THROTHLING_LIMIT_PER_SEC = 30;
+    private final static int THROTHLING_LIMIT_PER_SEC = 1;
     private final static int PAGE_SIZE = 100;
-    private final static int PAGES_LIMIT = 50;
+    private final static int PAGES_LIMIT = 500;
     private final static String MIN_REPUTATION = "223";
+    private final static String ACCESS_KEY = "v)BNnoGX599gljDYzv1Odw((";
+    private final static String FIELDS_FILTER = "!d0OIIVTgrb09xZY)*aPuDD0EMy4(rCDQ0FUn";
     private final static Set<String> REQUIRED_TAGS = new HashSet<>();
     private final static Set<String> REQUIRED_COUNTRIES = new HashSet<>();
 
@@ -45,7 +47,8 @@ public class Main
         params.put("sort", "reputation");
         params.put("site", "stackoverflow");
         params.put("min", MIN_REPUTATION);
-        params.put("filter", "!d0OIIVTgrb09xZY)*aPuDD0EMy4(rCDQ0FUn");
+        params.put("filter", FIELDS_FILTER);
+        params.put("key", ACCESS_KEY);
 
         String url = "https://api.stackexchange.com/";
 
@@ -64,7 +67,7 @@ public class Main
             {
                 try
                 {
-                    Thread.sleep(100 / THROTHLING_LIMIT_PER_SEC - executionTime);
+                    Thread.sleep(1000 / THROTHLING_LIMIT_PER_SEC - executionTime);
                 }
                 catch (InterruptedException ignored)
                 {
@@ -121,6 +124,8 @@ public class Main
                         }
                         return (true);
                     }).collect(Collectors.toList());
+
+            if (users.size() == 0) System.out.print("-\n");
             for (User u : users)
             {
                 System.out.print(u.getDisplayName() + "|" + u.getLocation() + "|" + u.getAnswerCount() + "|" + u.getQuestionCount() + "|");
