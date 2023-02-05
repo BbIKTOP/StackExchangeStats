@@ -16,9 +16,10 @@ import java.util.stream.Collectors;
 
 public class Main
 {
+    private final static String BASE_URL = "https://api.stackexchange.com/";
     private final static int THROTHLING_LIMIT_PER_10SEC = 290;
     private final static int PAGE_SIZE = 100;
-    private final static int PAGES_LIMIT = 1000;
+    private final static int PAGES_LIMIT = 2000;
     private final static String MIN_REPUTATION = "223";
     private final static String ACCESS_KEY = "v)BNnoGX599gljDYzv1Odw((";
     private final static String FIELDS_FILTER = "!d0OIIVTgrb09xZY)*aPuDD0EMy4(rCDQ0FUn";
@@ -39,7 +40,9 @@ public class Main
 
     public static void main(String[] args) throws IOException
     {
-        System.out.println("Starting: " + System.currentTimeMillis());
+        long startTime;
+        startTime = System.currentTimeMillis();
+        System.out.println("Started at: " + startTime);
 
         Map<String, String> params = new HashMap<>();
         params.put("pagesize", Integer.toString(PAGE_SIZE));
@@ -50,9 +53,7 @@ public class Main
         params.put("filter", FIELDS_FILTER);
         params.put("key", ACCESS_KEY);
 
-        String url = "https://api.stackexchange.com/";
-
-        Retrofit retrofit = new Retrofit.Builder().baseUrl(url).addConverterFactory(GsonConverterFactory.create()).build();
+        Retrofit retrofit = new Retrofit.Builder().baseUrl(BASE_URL).addConverterFactory(GsonConverterFactory.create()).build();
         StackExchangeUsers stackExchangeUsers = retrofit.create(StackExchangeUsers.class);
         Call<Items> call = stackExchangeUsers.getUsers(params);
 
@@ -165,6 +166,10 @@ public class Main
             pageNo++;
         } while (pageNo < PAGES_LIMIT);
 
-        System.out.println("Done: " + System.currentTimeMillis());
+        long endTime = System.currentTimeMillis();
+        System.out.printf("Done at: %d, took %d millis (%f seconds)\n",
+                endTime,
+                endTime - startTime,
+                (endTime - startTime) / 1000.0);
     }
 }
