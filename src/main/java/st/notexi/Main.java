@@ -85,21 +85,22 @@ public class Main
                 if (response.errorBody() != null)
                 {
                     errorDescription = new Gson().fromJson(response.errorBody().string(), ErrorDescription.class);
-                    System.out.printf("Server error %d (%s): %s\n",
+                    System.out.printf("Server error %d (%s): %s\nRequest #%d\n",
                             errorDescription.getErrorId(),
                             errorDescription.getErrorName(),
-                            errorDescription.getErrorMessage());
+                            errorDescription.getErrorMessage(),
+                            pageNo);
                 }
                 else
                 {
-                    System.out.println("Server error.");
+                    System.out.printf("Server error.\nRequest #%d\n", pageNo);
                 }
                 break;
             }
             items = response.body();
             if (items == null || items.getItems() == null)
             {
-                System.out.println("No users found!");
+                System.out.printf("No users found!\nRequest #%d\n", pageNo);
                 break;
             }
             call = call.clone();
