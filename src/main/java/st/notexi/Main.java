@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class Main
 {
-    private final static int THROTHLING_LIMIT_PER_SEC = 10;
+    private final static int THROTHLING_LIMIT_PER_10SEC = 5;
     private final static int PAGE_SIZE = 100;
     private final static int PAGES_LIMIT = 500;
     private final static String MIN_REPUTATION = "223";
@@ -58,23 +58,25 @@ public class Main
 
         long previousReqTime = 0;
         Items items;
-        int i = 1;
+        int pageNo = 1;
         do
         {
             // Check throttling
             long executionTime = System.currentTimeMillis() - previousReqTime;
-            if (executionTime < 1000 / THROTHLING_LIMIT_PER_SEC)
+            if (executionTime < 10000 / THROTHLING_LIMIT_PER_10SEC)
             {
                 try
                 {
-                    Thread.sleep(1000 / THROTHLING_LIMIT_PER_SEC - executionTime);
+                    Thread.sleep(10000 / THROTHLING_LIMIT_PER_10SEC - executionTime);
                 }
                 catch (InterruptedException ignored)
                 {
+                    System.out.println("Interrupted!");
                 }
             }
+            previousReqTime = System.currentTimeMillis();
 
-            params.put("page", Integer.toString(i));
+            params.put("page", Integer.toString(pageNo));
             Response<Items> response = call.execute(); // Synchronous request
 
             if (!response.isSuccessful())
@@ -126,7 +128,7 @@ public class Main
                         return (true);
                     }).collect(Collectors.toList());
 
-//            if (users.size() == 0) System.out.print("-\n");
+//            if (users.size() == 0) System.out.println(executionTime + " " + System.currentTimeMillis());
             for (User u : users)
             {
                 System.out.print(u.getDisplayName() + "|" +
@@ -153,9 +155,8 @@ public class Main
                         u.getLink() + "|" +
                         u.getProfileImage() + "|");
             }
-            i++;
-            previousReqTime = System.currentTimeMillis();
-        } while (i < PAGES_LIMIT);
+            pageNo++;
+        } while (pageNo < PAGES_LIMIT);
 
         System.out.println("Done: " + System.currentTimeMillis());
     }
