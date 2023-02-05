@@ -27,6 +27,9 @@ public class User
     @SerializedName("user_id")
     @Expose
     private Integer userId;
+    @SerializedName("user_type")
+    @Expose
+    private String userType;
     @SerializedName("location")
     @Expose
     private String location;
